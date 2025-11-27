@@ -1,114 +1,108 @@
-" ========== Vim-Plug Plugin Manager ==========
+" =========================
+" =   PLUGIN MANAGER      =
+" =========================
 call plug#begin('~/.vim/plugged')
 
-" File explorer & icons
+" File Explorer
 Plug 'preservim/nerdtree'
 Plug 'ryanoasis/vim-devicons'
 
 " Statusline
 Plug 'itchyny/lightline.vim'
 
-" Completion engine (VSCode-like)
+" Completion engine (VSCode-level LSP)
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
-" Snippets
-Plug 'SirVer/ultisnips'
-Plug 'honza/vim-snippets'
+" Snippet engine
+Plug 'neoclide/coc-snippets'
 
-" Auto close tags & pairs
-Plug 'alvan/vim-closetag'
+" Auto pairs
 Plug 'jiangmiao/auto-pairs'
 
-" JavaScript / TypeScript support
+" Syntax highlighting
 Plug 'pangloss/vim-javascript'
 Plug 'HerringtonDarkholme/yats.vim'
-
-" HTML5 & CSS3 syntax
 Plug 'othree/html5.vim'
 Plug 'hail2u/vim-css3-syntax'
 
-" Emmet for fast HTML/CSS coding
-Plug 'mattn/emmet-vim'
-
-" Linting and fixing
-Plug 'dense-analysis/ale'
-
-" Git integration
+" Git
 Plug 'tpope/vim-fugitive'
-
-" Commenting and surrounding text
-Plug 'tpope/vim-commentary'
-Plug 'tpope/vim-surround'
 
 " Fuzzy finder
 Plug 'junegunn/fzf'
 Plug 'junegunn/fzf.vim'
 
-" Live server for web preview
-Plug 'wolandark/vim-live-server'
-
-" Gruvbox theme (dark mode)
+" Colorscheme
 Plug 'morhetz/gruvbox'
 
 call plug#end()
 
-" ========== General Settings ==========
 
-set number                  " Show line numbers
-set expandtab               " Use spaces instead of tabs
-set tabstop=2               " Number of spaces per tab
-set shiftwidth=2            " Number of spaces for auto-indent
-set smartindent             " Auto indent new lines
-set nowrap                  " Do not wrap long lines
-set mouse=                  " Disable mouse support
-set termguicolors           " Enable true color support
-set background=dark         " Tell Vim terminal background is dark
-
-" Set the colorscheme to gruvbox
+" =========================
+" =   GENERAL SETTINGS     =
+" =========================
+set number
+set expandtab
+set tabstop=2
+set shiftwidth=2
+set smartindent
+set nowrap
+set mouse=
+set termguicolors
+set background=dark
 colorscheme gruvbox
 
-" ========== Lightline config ==========
+
+" =========================
+" =   LIGHTLINE           =
+" =========================
 let g:lightline = { 'colorscheme': 'gruvbox' }
 
-" ========== Key mappings ==========
 
-" Map Ctrl+n to toggle NERDTree (Ctrl+b genelde tmux vb. programlarda kullanılır)
+" =========================
+" =   KEYMAPS             =
+" =========================
 nnoremap <C-b> :NERDTreeToggle<CR>
-
-" Alternative toggle with F2
 nnoremap <F2> :NERDTreeToggle<CR>
 
-nnoremap <C-p> :Files<CR>              " Ctrl+p to open fuzzy file finder (fzf)
-nnoremap <C-f> :Rg<CR>                 " Ctrl+f to search text (fzf + ripgrep)
-nnoremap <C-s> :w<CR>                  " Ctrl+s to save file
-inoremap <C-s> <Esc>:w<CR>a            " Ctrl+s to save in insert mode
-nnoremap <C-q> :q<CR>                  " Ctrl+q to quit
+nnoremap <C-p> :Files<CR>
+nnoremap <C-f> :Rg<CR>
 
-" ========== Emmet ==========
-let g:user_emmet_leader_key = '<C-e>'
+nnoremap <C-s> :w<CR>
+inoremap <C-s> <Esc>:w<CR>a
 
-" ========== ALE (linting) config ==========
-let g:ale_linters = {
-\   'javascript': ['eslint'],
-\   'typescript': ['eslint'],
-\   'html': ['tidy'],
-\   'css': ['stylelint'],
-\}
-let g:ale_fixers = {
-\   '*': ['remove_trailing_lines', 'trim_whitespace'],
-\   'javascript': ['prettier'],
-\   'typescript': ['prettier'],
-\}
-let g:ale_fix_on_save = 1
 
-" ========== coc.nvim settings ==========
-inoremap <silent><expr> <C-Space> coc#refresh()
-inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
-inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+" =========================
+" =   COC SETTINGS        =
+" =========================
 
-" ========== vim-closetag ==========
-let g:closetag_filenames = '*.html,*.xhtml,*.phtml,*.js,*.jsx,*.ts,*.tsx'
+" ENTER → tamamlamayı onayla
+inoremap <silent><expr> <CR> coc#pum#visible()
+      \ ? coc#pum#confirm()
+      \ : "\<CR>"
 
-" ========== Highlight TODO, FIXME ==========
-syntax match TodoComment "\v<(TODO|FIXME|HACK):"
-highlight link TodoComment Todo
+" Backspace kontrol fonksiyonu
+function! CheckBackspace() abort
+  let col = col('.') - 1
+  return !col || getline('.')[col - 1] =~# '\s'
+endfunction
+
+" TAB → tamamlamayı aç / sıradaki öneriye git
+inoremap <silent><expr> <Tab>
+      \ coc#pum#visible() ? coc#pum#next(1) :
+      \ CheckBackspace() ? "\<Tab>" :
+      \ coc#refresh()
+
+" Shift+Tab → önceki öneri
+inoremap <silent><expr> <S-Tab>
+      \ coc#pum#visible() ? coc#pum#prev(1) : "\<C-h>"
+
+" COC LSP extensions
+let g:coc_global_extensions = [
+  \ 'coc-snippets',
+  \ 'coc-html',
+  \ 'coc-css',
+  \ 'coc-tsserver',
+  \ 'coc-pyright',
+  \ 'coc-go'
+  \ ]
